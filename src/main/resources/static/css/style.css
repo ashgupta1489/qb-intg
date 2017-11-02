@@ -1,0 +1,45 @@
+body {
+  padding-bottom: 20px;
+  margin-bottom: 60px;
+}
+
+.navbar {
+  margin-bottom: 20px;
+}
+
+.section-divider{
+    height: 3px;
+    width:100%;
+    display:block; /* for use on default inline elements like span */
+    overflow: hidden;
+    background-color: #d3d3d3;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Set the fixed height of the footer here */
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #2d3943;
+}
+
+.footer .ftr-top-bar{
+	background: #ef5f33 url(../images/footer_top_bar_desktop.png) no-repeat top center;
+	height: 10px;
+}
+
+.imgLink {
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 25px;
+}
+.imgLink:visited {
+  color: #0000ee;
+}

@@ -1,0 +1,128 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta name="description" content="" />
+<meta name="author" content="" />
+<link rel="icon" href="../../../../favicon.ico" />
+
+<title>PNC QuickBook Integration</title>
+<link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" 	th:href="@{css/bootstrap.min.css}" />
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker.standalone.min.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+	crossorigin="anonymous"></script>
+<script src="/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css" />
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<a class="navbar-brand" href="#">Quick Book Integration</a>
+		<div class="collapse navbar-collapse" id="navbarsExample04">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item active"><a class="nav-link" href="#"
+					id="setupLnk">Setup <span class="sr-only">(current)</span>
+				</a></li>
+				<li class="nav-item"><a class="nav-link" href="#" id="billLink">Outstanding Bills</a></li>
+				<li class="nav-item"><a class="nav-link" id="billPayments" href="#">Payments</a></li>
+				<li class="nav-item"><a class="nav-link" href="#"
+					id="viewVendorsLink">Vendors</a></li>
+			</ul>
+			
+			<a class="navbar-brand" href="#">John Doe</a>
+		</div>
+	</nav>
+	<div class="container">
+		<div class="jumbotron">
+			<div class="container connection data-section"
+				th:if="${session.containsKey('access_token')}">
+				<h1 class="display-5">You are connected to QuickBooks</h1>
+			</div>
+			<!-- ELSE -->
+			<div class="container connection data-section"
+				th:unless="${session.containsKey('access_token')}">
+				<h1 class="display-5">Connect to QuickBooks</h1>
+				<p class="lead">
+					Once you click on below link, this would take you to the QuickBooks
+					OAuth portal to authenticate and authorize you. Once authorized ,
+					the page would automatically refresh with connection status.<br /> <a class="imgLink"
+						th:onclick="'launchPopup(\'connectToQuickbooks\');'" role="button"
+						href="#"> <img style="height: 40px"
+						src="../static/images/C2QB_white_btn_lg_default.png"
+						th:src="@{/images/C2QB_white_btn_lg_default.png}" />
+					</a>
+				</p>
+			</div>
+			<div class="container connection data-section section-divider"></div>
+			<div class="container connection data-section">
+				<h1 class="display-5">Connect to Xero</h1>
+				<p class="lead">
+					Once you click on below link, this would take you to the Xero OAuth portal to authenticate and authorize you. Once authorized ,
+					the page would automatically refresh with connection status.<br />
+					<a class="imgLink" role="button" href="#null">
+						<img style="height: 60px; width: 230px;" src="../static/images/connect_xero_button_blue_2x.png" 
+								th:src="@{/images/connect_xero_button_blue_2x.png}" />
+					</a>
+				</p>
+			</div>
+		<div class="container data-section" id="no-bills" style="display: none">
+		</div>
+			<!--  Bill section -->
+			<div class="container data-section" id="bill" style="display: none">
+				<h1 class="display-5">View Bills</h1>
+				<table class="table table-striped" id="billTable">
+					<thead>
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">Date</th>
+							<th scope="col">Payee</th>
+							<th scope="col">Category</th>
+							<th scope="col">Due Date</th>
+							<th scope="col">Balance</th>
+							<th scope="col">Total</th>
+							<th scope="col">Action</th>
+						</tr>
+					</thead>
+					<tbody id="billData">
+					</tbody>
+				</table>
+				<div th:replace="payment :: #paymentModal" style="display: none"></div>
+			</div>
+			
+			<div class="container data-section" id="no-payments" style="display: none">
+		</div>
+			<!--  Payment section -->
+			<div class="container data-section" id="payments" style="display: none">
+				<h1 class="display-5">View Payments</h1>
+				<table class="table table-striped" id="paymentTable">
+					<thead>
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">Vendor</th>
+							<th scope="col">Date</th>
+							<th scope="col">Pay Type</th>
+							<th scope="col">Amount</th>
+							<th scope="col">Bill #</th>
+						</tr>
+					</thead>
+					<tbody id="paymentData">
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+	</div>
+	<footer class="footer">
+	<!-- <div class="ftr-top-bar"></div> -->
+      <div class="container">
+        <span class="text-muted">PNC QuickBook Integration</span>
+      </div>
+    </footer>
+</body>
+<script src="/js/app.js"></script>
+</html>
