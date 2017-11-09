@@ -22,9 +22,6 @@ public class MakePaymentModalView  implements Serializable{
 	@JsonIgnore
 	private String vendorId;
 	
-	
-	
-	
 	public String getPaymentId() {
 		return paymentId;
 	}

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.sample.qbintg.intg.util.Utilities;
 
 import com.intuit.ipp.data.BillPayment;
@@ -30,7 +31,7 @@ public class BillPaymentModelView implements Serializable{
 			throw new IllegalArgumentException("Wrong or null input");
 		}
 		this.paymentType= billPayment.getPayType().value();
-		this.billPaymentId = billPayment.getId();
+		this.billPaymentId = StringUtils.isNotEmpty(billPayment.getId())?billPayment.getId():"Void";
 		this.vendorName=billPayment.getVendorRef().getName();
 		this.txnDate = Utilities.convertDateToString(billPayment.getTxnDate());
 		this.amountPaid = Utilities.toCurrency(billPayment.getTotalAmt(), billPayment.getCurrencyRef().getValue());
@@ -40,7 +41,7 @@ public class BillPaymentModelView implements Serializable{
 			billTransId.append(line.getLinkedTxn().stream().filter(fullPredicate).
 					map(s -> s.getTxnId()).collect(Collectors.joining(",")));
 		}
-		this.billTxnId = billTransId.toString();
+		this.billTxnId = StringUtils.isNotEmpty(billTransId.toString())?billTransId.toString():"Void";
 	}
 
 	

@@ -2,6 +2,7 @@ package org.sample.qbintg;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 
 
@@ -11,6 +12,7 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguratio
  *
  */
 @SpringBootApplication
+@EnableJpaAuditing
 public class Application extends RepositoryRestMvcConfiguration  {
 
 	public static void main(String[] args) {

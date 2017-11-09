@@ -24,7 +24,7 @@ public class OAuth2PlatformClientFactory {
 	
 	@PostConstruct
 	public void init() {
-		logger.info("Hello Inside Init ");
+		logger.info("Initializing the Oauth factory for Quickbook connection.");
 		// Initialize a single thread executor, this will ensure only one thread processes the queue
 		oauth2Config = new OAuth2Config.OAuth2ConfigBuilder(env.getProperty("OAuth2AppClientId"), env.getProperty("OAuth2AppClientSecret")) //set client id, secret
 				.callDiscoveryAPI(Environment.SANDBOX) // call discovery API to populate urls

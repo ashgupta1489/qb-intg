@@ -2,33 +2,29 @@ package org.sample.qbintg.intg.controller;
 
 import static org.sample.qbintg.intg.model.DataType.BILL;
 import static org.sample.qbintg.intg.model.DataType.BILL_PAYMENT;
+import static org.sample.qbintg.intg.model.DataType.VENDOR;
 import static org.sample.qbintg.intg.model.MessageEnum.BEARER_ERROR;
 import static org.sample.qbintg.intg.model.MessageEnum.CONNECTION_INCOMPLETE;
 import static org.sample.qbintg.intg.model.MessageEnum.GENERIC_ERROR;
 import static org.sample.qbintg.intg.model.MessageEnum.REFRESH_ERROR;
-import static org.sample.qbintg.intg.model.MessageEnum.RETRIEVE_BILLPAYMENT_ERROR;
-import static org.sample.qbintg.intg.model.MessageEnum.RETRIEVE_BILL_ERROR;
 import static org.sample.qbintg.intg.model.MessageEnum.SETUP_ERROR;
 import static org.sample.qbintg.intg.model.MessageEnum.UNAUTH_ERROR;
 import static org.sample.qbintg.intg.util.Utilities.getMessage;
-import static org.sample.qbintg.intg.util.Utilities.getResultJsonString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.sample.qbintg.OAuth2PlatformClientFactory;
 import org.sample.qbintg.intg.helper.DataHelper;
-import org.sample.qbintg.intg.model.BillModelView;
-import org.sample.qbintg.intg.model.BillPaymentModelView;
-import org.sample.qbintg.intg.model.DataQuery;
 import org.sample.qbintg.intg.model.DataType;
 import org.sample.qbintg.intg.model.MakePaymentModalView;
 import org.sample.qbintg.intg.model.MessageEnum;
+import org.sample.qbintg.intg.model.VendorDto;
+import org.sample.qbintg.repository.IDataRepository;
+import org.sample.qbintg.repository.VendorDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,8 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.intuit.ipp.core.Context;
 import com.intuit.ipp.core.ServiceType;
-import com.intuit.ipp.data.Bill;
-import com.intuit.ipp.data.BillPayment;
 import com.intuit.ipp.data.Error;
 import com.intuit.ipp.exception.FMSException;
 import com.intuit.ipp.exception.InvalidTokenException;
@@ -59,12 +53,84 @@ public class RestAPIController {
 	@Autowired
 	private OAuth2PlatformClientFactory factory;
 
+	@Autowired
+	private VendorDataRepository vendorDataRepository;
+
 	private DataService dataService;
 
 	@RequestMapping("/health")
 	public String checkHealth(){
 		return "Working fine";
 	}
+
+	//Throttling can be implemented here
+	@ResponseBody
+	@RequestMapping("/getBills")
+	public String getBills(HttpSession session) {
+		return getData(session, BILL);
+	}
+
+
+	@ResponseBody
+	@RequestMapping("/getBillPayments")
+	public String getBillPayments(HttpSession session) {
+		return getData(session, BILL_PAYMENT);
+	}
+
+
+	/**
+	 * Bills QBO API call using OAuth2 tokens
+	 * @param session
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/getVendors")
+	public String getVendors(HttpSession session) {
+		return getData(session, VENDOR);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/makePayment", method = RequestMethod.POST)
+	public String makePayment(HttpSession session, @RequestBody MakePaymentModalView makePayment) {
+		logger.info("Inside Payment object");
+		String failureMsg = validateConfig(session);
+		boolean isPaid = false;
+		if(!StringUtils.isEmpty(failureMsg)){
+			return failureMsg;
+		}
+		try{
+			isPaid= DataHelper.createBillPayment(dataService,makePayment);
+		}
+		catch(Exception e){
+			return MessageEnum.UNABLE_PAYMENT_ERROR.desc();
+		}
+		logger.info("Bill Paid : " + isPaid);
+		//session.setAttribute("billUpdated", true);
+		return "Payment Completed";
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/saveVendor", method = RequestMethod.POST)
+	public String saveVendor(HttpSession session, @RequestBody VendorDto vendorDto) {
+		logger.info("Inside Vendor save method ");
+		String failureMsg = validateConfig(session);
+		boolean isSaved = false;
+		if(!StringUtils.isEmpty(failureMsg)){
+			return failureMsg;
+		}
+		try{
+			isSaved= DataHelper.saveVendor(dataService,vendorDataRepository,vendorDto);
+		}
+		catch(Exception e){
+			return MessageEnum.UNABLE_PAYMENT_ERROR.desc();
+		}
+		logger.info("Vendor Saved " + isSaved);
+		//session.setAttribute("billUpdated", true);
+		return "Payment Completed";
+	}
+
+
+
 
 	private String validateConfig(HttpSession session){
 		String failureMsg="";
@@ -129,17 +195,12 @@ public class RestAPIController {
 
 
 	private String getData(HttpSession session, DataType dataType){
-		String failureMsg="",sql="";
-		MessageEnum messageEnum = GENERIC_ERROR ;
-		if(dataType.equals(BILL)){
-			messageEnum= RETRIEVE_BILL_ERROR;
-			failureMsg = RETRIEVE_BILL_ERROR.desc();
-			sql = DataQuery.OUTSTANDING_BILL_QUERY;
-		}
-		else if(dataType.equals(BILL_PAYMENT)){
-			messageEnum= RETRIEVE_BILLPAYMENT_ERROR;
-			failureMsg = RETRIEVE_BILLPAYMENT_ERROR.desc();
-			sql = DataQuery.BILLPAYMENT_QUERY;
+		MessageEnum messageEnum = dataType.getFailureMessage();
+		String failureMsg=messageEnum.desc();
+		String sql = dataType.getSql();
+		IDataRepository dataRepository = null;
+		if(dataType==VENDOR){
+			dataRepository = vendorDataRepository;
 		}
 
 		try {
@@ -148,7 +209,7 @@ public class RestAPIController {
 				return failureMsg;
 			}
 			QueryResult queryResult = dataService.executeQuery(sql);
-			return processResponseForType(queryResult,dataType);
+			return DataHelper.processResponseForType(queryResult,dataType,dataRepository);
 		}
 		catch (InvalidTokenException e) {			
 			logger.error(failureMsg + e.getMessage());
@@ -157,7 +218,7 @@ public class RestAPIController {
 				refreshTokens(session);
 				logger.info("Calling data service again");
 				QueryResult queryResult = dataService.executeQuery(sql);
-				return processResponseForType(queryResult,dataType);
+				return  DataHelper.processResponseForType(queryResult,dataType,dataRepository);
 			} 
 			catch (FMSException e2) {
 				logger.error(failureMsg + e2.getMessage());
@@ -173,102 +234,19 @@ public class RestAPIController {
 			logger.error(failureMsg + e2.getMessage());
 			return getMessage(messageEnum);
 		}
+		catch (Exception e1) {
+			logger.error(failureMsg + e1.getMessage());
+			return getMessage(messageEnum);
+		}
 	}
 
-	/*
-	 * move to factory
-	 */
-	private String processResponseForType(QueryResult queryResult, DataType dataType) {
-		if(dataType.equals(BILL)){
-			return processBillResponse(queryResult);
-		}
-		else if(dataType.equals(BILL_PAYMENT)){
-			return processBillPaymentResponse(queryResult);
-		}
-		return getMessage(GENERIC_ERROR);
-	}
-
-	/**
-	 * Bills QBO API call using OAuth2 tokens
-	 * @param session
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping("/getBills")
-	public String getBills(HttpSession session) {
-			return getData(session, BILL);
-	}
-
-	
-	@ResponseBody
-	@RequestMapping("/getBillPayments")
-	public String getBillPayments(HttpSession session) {
-			return getData(session, BILL_PAYMENT);
-	}
-	
-
-	
-	@ResponseBody
-	@RequestMapping(value = "/makePayment", method = RequestMethod.POST)
-	public String makePayment(HttpSession session, @RequestBody MakePaymentModalView makePayment) {
-		logger.info("Inside Payment object");
-		String failureMsg = validateConfig(session);
-		boolean isPaid = false;
-		if(!StringUtils.isEmpty(failureMsg)){
-			return failureMsg;
-		}
-		try{
-			isPaid= DataHelper.createBillPayment(dataService,makePayment);
-		}
-		catch(Exception e){
-			return MessageEnum.UNABLE_PAYMENT_ERROR.desc();
-		}
-		logger.info("Bill Paid : " + isPaid);
-		return "Payment Completed";
-	}
-	
 
 
-	private String processBillPaymentResponse(QueryResult queryResult) {
-		if (!queryResult.getEntities().isEmpty() && queryResult.getEntities().size() > 0) {
-			try {
-				List<BillPayment> data = (List<BillPayment>)queryResult.getEntities();
-				logger.info("Total number of data: " + data.size());
-				List<BillPaymentModelView> views = new ArrayList<>();
-				if(CollectionUtils.isNotEmpty(data)){
-					data.stream().forEach(bill -> views.add(new BillPaymentModelView(bill)));
-				}
-				else{
-					return getMessage(RETRIEVE_BILL_ERROR);
-				}
-				return getResultJsonString(views);
-			} catch (Exception e) {
-				logger.error(GENERIC_ERROR.desc(), e);
-				return getMessage(GENERIC_ERROR);
-			}
-		}
-		return GENERIC_ERROR.desc();
-	}
-	
-	private String processBillResponse(QueryResult queryResult) {
-		if (!queryResult.getEntities().isEmpty() && queryResult.getEntities().size() > 0) {
-			try {
-				List<Bill> data = (List<Bill>)queryResult.getEntities();
-				logger.info("Total number of data: " + data.size());
-				List<BillModelView> views = new ArrayList<>();
-				if(CollectionUtils.isNotEmpty(data)){
-					data.stream().forEach(bill -> views.add(new BillModelView(bill)));
-				}
-				else{
-					return getMessage(RETRIEVE_BILL_ERROR);
-				}
-				return getResultJsonString(views);
-			} catch (Exception e) {
-				logger.error(GENERIC_ERROR.desc(), e);
-				return getMessage(GENERIC_ERROR);
-			}
-		}
-		return GENERIC_ERROR.desc();
-	}
+
+
+
+
+
+
 
 }

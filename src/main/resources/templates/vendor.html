@@ -1,0 +1,61 @@
+<div class="modal fade" id="vendorModal" tabindex="-1" role="dialog" aria-labelledby="vendorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="vendorModalLabel">Vendor</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="vendorForm" name="vendorForm">
+         <div class="form-group row">
+    			<label for="displayName" class="col-sm-4 col-form-label">Display Name: </label>
+   				<div class="col-sm-6">
+      				<input type="text" readonly="readonly" disabled="disabled" class="form-control-plaintext" id="displayName" name="displayName"  placeholder="My Display Name"  style="width: 100%"/>
+    			</div>
+    			
+  		</div>
+  		<div class="form-group row">
+    			<label for="companyName" class="col-sm-4 col-form-label">Company Name: </label>
+   				<div class="col-sm-6">
+      				<input type="text" readonly="readonly" disabled="disabled" class="form-control-plaintext" name="companyName" id="companyName"  placeholder="My Company Name"  style="width: 100%"/>
+    			</div>
+    			
+  		</div>
+  		<div class="form-group row">
+    			<label for="primaryEmail" class="col-sm-4 col-form-label">Email Address: </label>
+   				<div class="col-sm-6">
+      				<input type="email" readonly="readonly" disabled="disabled" class="form-control" id="primaryEmail"  name="primaryEmail" placeholder="email@email.com" />
+    			</div>
+    			
+  		</div>
+  		<div class="form-group row">
+    			<label for="phnNum" class="col-sm-4 col-form-label">Primary Phone Number: </label>
+   				<div class="col-sm-6">
+      				<input type="text" readonly="readonly" disabled="disabled" class="form-control" id="phnNum" name="phnNum" placeholder="123-456-7890" maxlength="10"/>
+    			</div>
+  		</div>
+        <div class="form-group row">
+            <label for="accountNumber"  class="col-sm-4 col-form-label">Account Number:</label>
+            <div class="col-sm-6">
+            	<input type="text" class="form-control edit" id="accountNumber" name="accountNumber" placeholder="Account Number" maxlength="17" />
+        	</div>  
+        </div>
+        
+        <div class="form-group row">
+            <label for="routingNumber"  class="col-sm-4 col-form-label">Routing Number:</label>
+            <div class="col-sm-6">
+            	<input type="text"  class="form-control edit" id="routingNumber"   name="routingNumber"  placeholder="Routing Number" maxlength="9" />
+        	<input type="hidden" name="vendorId"  class="edit" id="vendorId" />
+        	</div>  
+        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">&nbsp;Close&nbsp;</button>
+        <button type="button" class="btn btn-primary" id="saveVendor">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -38,7 +38,7 @@ public class BillModelView implements Serializable {
 		String category= "";
 		if(bill.getLine()!=null  && bill.getLine().size()>0){
 			if(bill.getLine().size()>1){
-				category = "Multiple";
+				category = "Multiple Categories";
 			}
 			else{
 				if(CollectionUtils.isNotEmpty(bill.getLine()) && bill.getLine().get(0).getAccountBasedExpenseLineDetail()!=null 
