@@ -1,3 +1,4 @@
+ ```sql
  CREATE TABLE `pnc_vendor` (
   `vendor_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_num` varchar(17) DEFAULT NULL,
@@ -11,3 +12,4 @@
   UNIQUE INDEX `vendor_id_UNIQUE_3` (`vendor_id` ASC),
   UNIQUE INDEX `related_vendor_id_UNIQUE_3` (`related_vendor_id` ASC)
 )
+```
