@@ -74,6 +74,7 @@ public class RestAPIController {
 	@ResponseBody
 	@RequestMapping("/getBillPayments")
 	public String getBillPayments(HttpSession session) {
+		System.out.println(Config.getProperty(Config.PROXY_PASSWORD));
 		return getData(session, BILL_PAYMENT);
 	}
 
@@ -160,6 +161,11 @@ public class RestAPIController {
 	private void getDataService(String realmId, String accessToken) throws FMSException {
 		OAuth2Authorizer oauth = new OAuth2Authorizer(accessToken);
 		Context context = new Context(oauth, ServiceType.QBO, realmId); 
+		/*Config.getProperty(Config.PROXY_PASSWORD);
+		Config.setProperty(Config.PROXY_HOST, "proxy.pncbank.com");
+		Config.setProperty(Config.PROXY_PORT, "8080");
+		Config.setProperty(Config.PROXY_USERNAME, "XX58077");
+		Config.setProperty(Config.PROXY_PASSWORD, "feb@2016");*/
 		dataService =  new DataService(context);
 	}
 

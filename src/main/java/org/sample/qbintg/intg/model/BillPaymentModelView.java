@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sample.qbintg.intg.util.Utilities;
 
 import com.intuit.ipp.data.BillPayment;
